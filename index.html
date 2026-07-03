@@ -976,75 +976,64 @@ window.toggleTranslation = function(toggle) {
   content.classList.toggle('expanded');
 };
 
-// ===== TTS Pronunciation (cross-platform: iOS + Android + Desktop) =====
-let _ttsVoices = [];
-let _currentUtterance = null; // keep reference to prevent iOS GC
-
-function loadVoices() {
-  _ttsVoices = speechSynthesis.getVoices();
-}
-
-// Prime speechSynthesis (iOS needs a user-gesture-triggered utterance to "wake up")
-function primeSpeech() {
-  if (!('speechSynthesis' in window)) return;
-  const dummy = new SpeechSynthesisUtterance('');
-  dummy.volume = 0;
-  dummy.rate = 0.01;
-  speechSynthesis.speak(dummy);
-  // Remove this one-time primer after first user interaction
-  document.removeEventListener('click', primeSpeech);
-  document.removeEventListener('touchstart', primeSpeech);
-}
-
-document.addEventListener('click', primeSpeech);
-document.addEventListener('touchstart', primeSpeech);
-
-// Load voices when they become available
-if ('speechSynthesis' in window) {
-  speechSynthesis.onvoiceschanged = loadVoices;
-  loadVoices();
-}
+// ===== TTS Pronunciation — Google TTS audio (iOS + Android + Desktop) =====
+// speechSynthesis is notoriously buggy on iOS Safari (cancel+speak = silent, stuck state, etc.)
+// Google TTS audio via <audio> element works reliably on all platforms.
+let _ttsAudio = null;
 
 function speakWord(word, el) {
+  // Clean up previous audio
+  if (_ttsAudio) {
+    _ttsAudio.onended = null;
+    _ttsAudio.onerror = null;
+    _ttsAudio.pause();
+    _ttsAudio.removeAttribute('src');
+    _ttsAudio.load();
+    _ttsAudio = null;
+  }
+
+  if (el) el.classList.add('playing-sound');
+
+  _ttsAudio = new Audio();
+  _ttsAudio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=' + encodeURIComponent(word);
+
+  _ttsAudio.onended = () => {
+    if (el) el.classList.remove('playing-sound');
+    _ttsAudio = null;
+  };
+  _ttsAudio.onerror = () => {
+    if (el) el.classList.remove('playing-sound');
+    _ttsAudio = null;
+  };
+
+  _ttsAudio.play().catch(() => {
+    // Autoplay blocked or network error — try speechSynthesis fallback
+    if (el) el.classList.remove('playing-sound');
+    _ttsAudio = null;
+    fallbackSpeechSynthesis(word, el);
+  });
+}
+
+// Last-resort fallback using Web Speech API (works on some Android / desktop)
+function fallbackSpeechSynthesis(word, el) {
   if (!('speechSynthesis' in window)) return;
-
-  // iOS often pauses speechSynthesis - resume it
-  if (speechSynthesis.paused) {
-    speechSynthesis.resume();
-  }
-
-  // Cancel any previous utterance (keep ref alive to avoid iOS GC)
-  if (_currentUtterance) {
-    _currentUtterance.onend = null;
-    _currentUtterance.onerror = null;
-  }
-  speechSynthesis.cancel();
-
-  const utt = new SpeechSynthesisUtterance(word);
-  _currentUtterance = utt;
-
-  utt.lang = 'en-US';
-  utt.rate = 0.9;
-  utt.volume = 1;
-
-  // Explicitly pick an English voice if available
-  const voices = _ttsVoices.length ? _ttsVoices : speechSynthesis.getVoices();
-  const enVoice = voices.find(v => v.lang.startsWith('en') && v.localService) ||
-                  voices.find(v => v.lang.startsWith('en'));
-  if (enVoice) utt.voice = enVoice;
-
-  // Small delay to let cancel() settle on iOS
-  setTimeout(() => {
+  try {
+    if (speechSynthesis.paused) speechSynthesis.resume();
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(word);
+    utt.lang = 'en-US';
+    utt.rate = 0.9;
+    utt.volume = 1;
+    var voices = speechSynthesis.getVoices();
+    var en = voices.find(function(v) { return v.lang.startsWith('en'); });
+    if (en) utt.voice = en;
     if (el) {
       el.classList.add('playing-sound');
-      utt.onend = () => { el.classList.remove('playing-sound'); _currentUtterance = null; };
-      utt.onerror = () => { el.classList.remove('playing-sound'); _currentUtterance = null; };
-    } else {
-      utt.onend = () => { _currentUtterance = null; };
-      utt.onerror = () => { _currentUtterance = null; };
+      utt.onend = function() { el.classList.remove('playing-sound'); };
+      utt.onerror = function() { el.classList.remove('playing-sound'); };
     }
     speechSynthesis.speak(utt);
-  }, 10);
+  } catch(e) { /* silent */ }
 }
 
 document.querySelectorAll('.vocab-item').forEach(item => {
