@@ -976,55 +976,101 @@ window.toggleTranslation = function(toggle) {
   content.classList.toggle('expanded');
 };
 
-// ===== Vocab Pronunciation — Local MP3 audio (zero network dependency) =====
-// Pre-generated with Microsoft edge-tts (en-US-JennyNeural), works on ALL platforms
-const vocabAudio = {};
-let _currentVocabAudio = null;
+// ===== Vocab Pronunciation — Multi-layer TTS fallback =====
+// Priority: Youdao → Baidu → Google → speechSynthesis (browser built-in)
+var TTS_SOURCES = [
+  {
+    name: 'youdao',
+    url: function(word) { return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(word) + '&type=0'; }
+  },
+  {
+    name: 'baidu',
+    url: function(word) { return 'https://fanyi.baidu.com/gettts?lan=en&text=' + encodeURIComponent(word) + '&spd=3'; }
+  },
+  {
+    name: 'google',
+    url: function(word) { return 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=' + encodeURIComponent(word); }
+  }
+];
 
-// Preload all vocab audio for instant playback
-(function preloadVocabAudio() {
-  document.querySelectorAll('.vocab-item').forEach(function(item) {
-    var word = item.dataset.en;
-    var audio = new Audio('assets/vocab/' + word + '.mp3');
-    audio.preload = 'auto';
-    audio.load();
-    vocabAudio[word] = audio;
-  });
-})();
+var _currentVocabAudio = null;
+var _speakRetryTimer = null;
 
 function speakWord(word, el) {
-  // Stop any currently playing vocab audio
-  if (_currentVocabAudio && !_currentVocabAudio.paused) {
-    _currentVocabAudio.pause();
-    _currentVocabAudio.currentTime = 0;
-  }
-
-  var audio = vocabAudio[word];
-  if (!audio) {
-    // fallback: create new audio on the fly
-    audio = new Audio('assets/vocab/' + word + '.mp3');
-    vocabAudio[word] = audio;
-  }
-
-  // Reset to beginning if already played
-  audio.currentTime = 0;
-  _currentVocabAudio = audio;
+  // Clean up previous playback
+  stopCurrentAudio();
+  if (_speakRetryTimer) { clearTimeout(_speakRetryTimer); _speakRetryTimer = null; }
 
   if (el) el.classList.add('playing-sound');
+
+  // Try each TTS source in order
+  trySource(0, word, el);
+}
+
+function trySource(index, word, el) {
+  if (index >= TTS_SOURCES.length) {
+    // All online sources failed — last resort: browser speechSynthesis
+    fallbackSpeech(word, el);
+    return;
+  }
+
+  var src = TTS_SOURCES[index];
+  var audio = new Audio();
+  audio.src = src.url(word);
+  _currentVocabAudio = audio;
 
   audio.onended = function() {
     if (el) el.classList.remove('playing-sound');
     _currentVocabAudio = null;
   };
+
   audio.onerror = function() {
-    if (el) el.classList.remove('playing-sound');
+    // This source failed, try next
     _currentVocabAudio = null;
+    trySource(index + 1, word, el);
   };
 
   audio.play().catch(function() {
-    if (el) el.classList.remove('playing-sound');
     _currentVocabAudio = null;
+    trySource(index + 1, word, el);
   });
+}
+
+function stopCurrentAudio() {
+  if (_currentVocabAudio) {
+    _currentVocabAudio.onended = null;
+    _currentVocabAudio.onerror = null;
+    _currentVocabAudio.pause();
+    _currentVocabAudio.removeAttribute('src');
+    _currentVocabAudio.load();
+    _currentVocabAudio = null;
+  }
+}
+
+// Last resort: browser built-in speechSynthesis
+function fallbackSpeech(word, el) {
+  if (!('speechSynthesis' in window)) {
+    if (el) el.classList.remove('playing-sound');
+    return;
+  }
+  try {
+    if (speechSynthesis.paused) speechSynthesis.resume();
+    speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(word);
+    utt.lang = 'en-US';
+    utt.rate = 0.9;
+    utt.volume = 1;
+    var voices = speechSynthesis.getVoices();
+    var en = voices.find(function(v) { return v.lang.startsWith('en'); });
+    if (en) utt.voice = en;
+    if (el) {
+      utt.onend = function() { el.classList.remove('playing-sound'); };
+      utt.onerror = function() { el.classList.remove('playing-sound'); };
+    }
+    speechSynthesis.speak(utt);
+  } catch(e) {
+    if (el) el.classList.remove('playing-sound');
+  }
 }
 
 // Vocab card click → play pronunciation only (no modal)
