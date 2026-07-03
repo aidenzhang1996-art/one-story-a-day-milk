@@ -976,71 +976,61 @@ window.toggleTranslation = function(toggle) {
   content.classList.toggle('expanded');
 };
 
-// ===== TTS Pronunciation — Google TTS audio (iOS + Android + Desktop) =====
-// speechSynthesis is notoriously buggy on iOS Safari (cancel+speak = silent, stuck state, etc.)
-// Google TTS audio via <audio> element works reliably on all platforms.
-let _ttsAudio = null;
+// ===== Vocab Pronunciation — Local MP3 audio (zero network dependency) =====
+// Pre-generated with Microsoft edge-tts (en-US-JennyNeural), works on ALL platforms
+const vocabAudio = {};
+let _currentVocabAudio = null;
+
+// Preload all vocab audio for instant playback
+(function preloadVocabAudio() {
+  document.querySelectorAll('.vocab-item').forEach(function(item) {
+    var word = item.dataset.en;
+    var audio = new Audio('assets/vocab/' + word + '.mp3');
+    audio.preload = 'auto';
+    audio.load();
+    vocabAudio[word] = audio;
+  });
+})();
 
 function speakWord(word, el) {
-  // Clean up previous audio
-  if (_ttsAudio) {
-    _ttsAudio.onended = null;
-    _ttsAudio.onerror = null;
-    _ttsAudio.pause();
-    _ttsAudio.removeAttribute('src');
-    _ttsAudio.load();
-    _ttsAudio = null;
+  // Stop any currently playing vocab audio
+  if (_currentVocabAudio && !_currentVocabAudio.paused) {
+    _currentVocabAudio.pause();
+    _currentVocabAudio.currentTime = 0;
   }
+
+  var audio = vocabAudio[word];
+  if (!audio) {
+    // fallback: create new audio on the fly
+    audio = new Audio('assets/vocab/' + word + '.mp3');
+    vocabAudio[word] = audio;
+  }
+
+  // Reset to beginning if already played
+  audio.currentTime = 0;
+  _currentVocabAudio = audio;
 
   if (el) el.classList.add('playing-sound');
 
-  _ttsAudio = new Audio();
-  _ttsAudio.src = 'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=' + encodeURIComponent(word);
-
-  _ttsAudio.onended = () => {
+  audio.onended = function() {
     if (el) el.classList.remove('playing-sound');
-    _ttsAudio = null;
+    _currentVocabAudio = null;
   };
-  _ttsAudio.onerror = () => {
+  audio.onerror = function() {
     if (el) el.classList.remove('playing-sound');
-    _ttsAudio = null;
+    _currentVocabAudio = null;
   };
 
-  _ttsAudio.play().catch(() => {
-    // Autoplay blocked or network error — try speechSynthesis fallback
+  audio.play().catch(function() {
     if (el) el.classList.remove('playing-sound');
-    _ttsAudio = null;
-    fallbackSpeechSynthesis(word, el);
+    _currentVocabAudio = null;
   });
 }
 
-// Last-resort fallback using Web Speech API (works on some Android / desktop)
-function fallbackSpeechSynthesis(word, el) {
-  if (!('speechSynthesis' in window)) return;
-  try {
-    if (speechSynthesis.paused) speechSynthesis.resume();
-    speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(word);
-    utt.lang = 'en-US';
-    utt.rate = 0.9;
-    utt.volume = 1;
-    var voices = speechSynthesis.getVoices();
-    var en = voices.find(function(v) { return v.lang.startsWith('en'); });
-    if (en) utt.voice = en;
-    if (el) {
-      el.classList.add('playing-sound');
-      utt.onend = function() { el.classList.remove('playing-sound'); };
-      utt.onerror = function() { el.classList.remove('playing-sound'); };
-    }
-    speechSynthesis.speak(utt);
-  } catch(e) { /* silent */ }
-}
-
-document.querySelectorAll('.vocab-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const word = item.dataset.en;
-    showModal(item.dataset.en, item.dataset.cn);
-    speakWord(word, item);
+// Vocab card click → play pronunciation only (no modal)
+document.querySelectorAll('.vocab-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    speakWord(item.dataset.en, item);
   });
 });
 
