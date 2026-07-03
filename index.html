@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Does Milk Come from? | One Story A Day</title>
+<style>
+/* ===== CSS Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #28AADC;
+  --primary-dark: #1a8bb8;
+  --primary-light: #5bc4e8;
+  --accent: #FAB43C;
+  --accent-light: #ffc96b;
+  --bg: #f0f6fa;
+  --card-bg: rgba(255,255,255,0.72);
+  --text: #2c3e50;
+  --text-light: #5a6978;
+  --shadow: 0 8px 32px rgba(40,173,220,0.12);
+  --radius: 20px;
+  --radius-sm: 14px;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== Background Decorations ===== */
+.bg-deco {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bg-deco .blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+}
+.bg-deco .blob-1 {
+  width: 400px; height: 400px;
+  background: var(--primary);
+  top: -100px; right: -80px;
+}
+.bg-deco .blob-2 {
+  width: 350px; height: 350px;
+  background: var(--accent);
+  bottom: 10%; left: -120px;
+  opacity: 0.2;
+}
+.bg-deco .blob-3 {
+  width: 250px; height: 250px;
+  background: var(--primary-light);
+  top: 45%; right: -60px;
+  opacity: 0.25;
+}
+
+/* ===== Main Container ===== */
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(16px, 4vw, 36px) clamp(16px, 5vw, 32px);
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== Glass Card ===== */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.55);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: clamp(20px, 4vw, 36px);
+  margin-bottom: 24px;
+}
+
+/* ===== Header ===== */
+.header {
+  text-align: center;
+  padding: clamp(28px, 5vw, 44px) clamp(20px, 4vw, 36px);
+  margin-bottom: 24px;
+}
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  font-size: clamp(11px, 2vw, 13px);
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 50px;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+.header h1 {
+  font-size: clamp(22px, 5vw, 34px);
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.header h1 span {
+  color: var(--primary);
+}
+.header-sub {
+  color: var(--text-light);
+  font-size: clamp(13px, 2.5vw, 15px);
+}
+
+/* ===== Audio Player ===== */
+.audio-player {
+  padding: clamp(18px, 3.5vw, 28px);
+  margin-bottom: 24px;
+}
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.player-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.player-icon svg { width: 20px; height: 20px; fill: white; }
+.player-title {
+  font-size: clamp(14px, 2.8vw, 16px);
+  font-weight: 700;
+  color: var(--text);
+}
+.player-hint {
+  font-size: 11px;
+  color: var(--text-light);
+  margin-top: 1px;
+}
+
+/* Progress bar */
+.progress-wrap { margin-bottom: 14px; }
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e2eaf0;
+  border-radius: 10px;
+  outline: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.progress-bar::-webkit-slider-runnable-track {
+  height: 8px; border-radius: 10px;
+  background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--progress, 0%), #e2eaf0 var(--progress, 0%), #e2eaf0 100%);
+}
+.progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  background: var(--primary);
+  border-radius: 50%;
+  margin-top: -5px;
+  box-shadow: 0 2px 8px rgba(40,173,220,0.35);
+  cursor: grab;
+  transition: transform 0.15s;
+}
+.progress-bar::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.progress-bar::-moz-range-track { height: 8px; border-radius: 10px; background: #e2eaf0; }
+.progress-bar::-moz-range-thumb {
+  width: 18px; height: 18px;
+  background: var(--primary); border: none;
+  border-radius: 50%; cursor: grab;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--text-light);
+  margin-bottom: 12px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.ctrl-btn {
+  width: 42px; height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #eef4f8;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.ctrl-btn:hover { background: #dceef7; transform: scale(1.08); }
+.ctrl-btn:active { transform: scale(0.95); }
+.ctrl-btn svg { width: 18px; height: 18px; fill: currentColor; }
+
+.play-btn {
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 18px rgba(40,173,220,0.35);
+}
+.play-btn:hover { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); box-shadow: 0 6px 24px rgba(40,173,220,0.45); }
+.play-btn svg { width: 24px; height: 24px; }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(40,173,220,0.4); }
+  70% { box-shadow: 0 0 0 14px rgba(40,173,220,0); }
+  100% { box-shadow: 0 0 0 0 rgba(40,173,220,0); }
+}
+.play-btn.playing { animation: pulse-ring 1.4s ease-out infinite; }
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 14px;
+}
+.speed-btn {
+  padding: 4px 10px;
+  border: 1.5px solid #dde5eb;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.speed-btn:hover { border-color: var(--primary); color: var(--primary); }
+.speed-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+
+/* Keyboard hint */
+.kbd-hint {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 10px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.kbd-key {
+  display: inline-block;
+  background: #eef4f8;
+  border: 1px solid #dde5eb;
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+/* ===== Story Section ===== */
+.story-section { margin-bottom: 24px; }
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: clamp(12px, 2.5vw, 14px);
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, var(--primary), transparent);
+  max-width: 80px;
+}
+
+/* Illustration */
+.illustration {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.illustration img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.illustration-caption {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* Story Text */
+.story-text {
+  font-size: clamp(15px, 3.2vw, 17.5px);
+  line-height: 1.85;
+  color: var(--text);
+}
+.story-text p { margin-bottom: 16px; }
+.story-text p:last-child { margin-bottom: 0; }
+
+/* Vocabulary highlight */
+.vocab-word {
+  color: var(--accent);
+  font-weight: 700;
+  cursor: help;
+  position: relative;
+  border-bottom: 2px dashed var(--accent);
+  transition: all 0.2s;
+  padding-bottom: 1px;
+}
+.vocab-word:hover {
+  background: rgba(250,180,60,0.12);
+  border-bottom-style: solid;
+}
+
+/* Tooltip (PC hover) */
+.vocab-word .tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--text);
+  color: white;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+.vocab-word .tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  margin-left: -6px;
+  border: 6px solid transparent;
+  border-top-color: var(--text);
+}
+.vocab-word:hover .tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== CSS Flowchart (Milk Production Process) ===== */
+.flowchart-section {
+  margin: 28px 0;
+  padding: 24px;
+  background: linear-gradient(145deg, rgba(40,173,220,0.06), rgba(250,180,60,0.06));
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(40,173,220,0.15);
+}
+.flowchart-title {
+  text-align: center;
+  font-size: clamp(14px, 3vw, 16px);
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 20px;
+}
+
+.flowchain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.flow-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.flow-icon {
+  width: clamp(52px, 9vw, 68px);
+  height: clamp(52px, 9vw, 68px);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 4vw, 30px);
+  transition: transform 0.3s ease;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+.flow-item:hover .flow-icon { transform: translateY(-3px) scale(1.06); }
+.flow-label {
+  font-size: clamp(11px, 2.2vw, 13px);
+  font-weight: 600;
+  color: var(--text);
+  text-align: center;
+  max-width: 72px;
+}
+.flow-arrow {
+  font-size: clamp(18px, 3.5vw, 26px);
+  color: var(--primary);
+  margin: 0 2px;
+  flex-shrink: 0;
+  font-weight: 300;
+}
+
+.fc-grass .flow-icon { background: linear-gradient(135deg, #a8e063, #56ab2f); }
+.fc-cow .flow-icon   { background: linear-gradient(135deg, #f5f0e1, #d4c4a8); }
+.fc-milk .flow-icon  { background: linear-gradient(135deg, #ffffff, #e8eff5); border: 2px solid #cde4f0; }
+.fc-farmer .flow-icon{ background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+.fc-store .flow-icon  { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); }
+
+/* ===== Collapsible Translation ===== */
+.translation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 12px 16px;
+  background: rgba(40,173,220,0.06);
+  border: 1.5px solid rgba(40,173,220,0.18);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: clamp(13px, 2.5vw, 14px);
+  font-weight: 600;
+  color: var(--primary);
+  transition: all 0.2s;
+  user-select: none;
+}
+.translation-toggle:hover {
+  background: rgba(40,173,220,0.1);
+  border-color: var(--primary);
+}
+.translation-toggle .toggle-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+  font-size: 12px;
+}
+.translation-toggle.open .toggle-arrow {
+  transform: rotate(90deg);
+}
+.translation-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease, opacity 0.35s ease;
+  opacity: 0;
+  background: rgba(250,180,60,0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: 0;
+  padding: 0 16px;
+  font-size: clamp(14px, 2.8vw, 16px);
+  line-height: 1.85;
+  color: var(--text);
+}
+.translation-content.expanded {
+  max-height: 600px;
+  opacity: 1;
+  margin-top: 8px;
+  padding: 14px 16px;
+}
+
+/* Vocab card sound indicator */
+.vocab-item {
+  position: relative;
+}
+.vocab-item .sound-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 14px;
+}
+.vocab-item:hover .sound-icon { opacity: 1; }
+.vocab-item.playing-sound {
+  border-color: var(--primary);
+  background: rgba(40,173,220,0.1);
+}
+.vocab-item.playing-sound .sound-icon { opacity: 1; }
+.vocab-card { margin-bottom: 24px; }
+.vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.vocab-item {
+  padding: 14px 16px;
+  background: rgba(250,180,60,0.07);
+  border: 1.5px solid rgba(250,180,60,0.2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+.vocab-item:hover {
+  background: rgba(250,180,60,0.14);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(250,180,60,0.12);
+}
+.vocab-en {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 3px;
+}
+.vocab-cn {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+/* Mobile vocab modal */
+.vocab-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 999;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.vocab-modal-overlay.show { display: flex; }
+.vocab-modal {
+  background: white;
+  border-radius: var(--radius);
+  padding: 28px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  animation: modalIn 0.25s ease;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.vocab-modal-en {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.vocab-modal-cn {
+  font-size: 18px;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.modal-close {
+  padding: 10px 28px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.modal-close:hover { background: var(--primary-dark); }
+
+/* ===== Scroll Reveal Animation ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.65s cubic-bezier(.22,1,.36,1), transform 0.65s cubic-bezier(.22,1,.36,1);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children */
+.stagger > *:nth-child(1) { transition-delay: 0s; }
+.stagger > *:nth-child(2) { transition-delay: 0.08s; }
+.stagger > *:nth-child(3) { transition-delay: 0.16s; }
+.stagger > *:nth-child(4) { transition-delay: 0.24s; }
+.stagger > *:nth-child(5) { transition-delay: 0.32s; }
+.stagger > *:nth-child(6) { transition-delay: 0.4s; }
+.stagger > *:nth-child(7) { transition-delay: 0.48s; }
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  padding: 24px 0 16px;
+  font-size: 12px;
+  color: var(--text-light);
+}
+.footer span { color: var(--primary); font-weight: 600; }
+
+/* ===== Responsive Tweaks ===== */
+@media (max-width: 480px) {
+  .flowchain { gap: 4px; }
+  .flow-arrow { margin: 0 1px; font-size: 14px; }
+  .vocab-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .controls { gap: 7px; }
+  .ctrl-btn { width: 38px; height: 38px; }
+  .play-btn { width: 50px; height: 50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background Decoration -->
+<div class="bg-deco">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="glass-card header reveal">
+    <div class="header-badge">📚 One Story A Day — Book 1 · January</div>
+    <h1>Where Does <span>Milk</span> Come from?</h1>
+    <p class="header-sub">牛奶是从哪里来的？让我们一起探索牛奶的旅程吧！🐄</p>
+  </header>
+
+  <!-- Audio Player -->
+  <div class="glass-card audio-player reveal">
+    <div class="player-header">
+      <div class="player-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      </div>
+      <div>
+        <div class="player-title">🎧 跟读音频</div>
+        <div class="player-hint">Track 01 — Where Does Milk Come from?</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-wrap">
+      <input type="range" class="progress-bar" id="progressBar" value="0" min="0" max="100" step="0.1">
+      <div class="time-row">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="ctrl-btn" id="btnBackward" title="快退 10秒" aria-label="Backward 10s">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+      </button>
+      <button class="ctrl-btn play-btn" id="btnPlay" title="播放/暂停 (空格键)" aria-label="Play/Pause">
+        <svg id="iconPlay" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="iconPause" style="display:none" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+      </button>
+      <button class="ctrl-btn" id="btnForward" title="快进 10秒" aria-label="Forward 10s">
+        <svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+      </button>
+    </div>
+
+    <!-- Speed Control -->
+    <div class="speed-control">
+      <button class="speed-btn" data-speed="0.5">0.5x</button>
+      <button class="speed-btn" data-speed="0.75">0.75x</button>
+      <button class="speed-btn active" data-speed="1">1x</button>
+      <button class="speed-btn" data-speed="1.25">1.25x</button>
+      <button class="speed-btn" data-speed="1.5">1.5x</button>
+    </div>
+
+    <div class="kbd-hint">
+      <span><kbd class="kbd-key">空格</kbd> 播放/暂停</span>
+      <span><kbd class="kbd-key">←</kbd> 快退</span>
+      <span><kbd class="kbd-key">→</kbd> 快进</span>
+    </div>
+
+    <audio id="audio" src="assets/track01.mp3" preload="metadata"></audio>
+  </div>
+
+  <!-- Story Content Part 1 -->
+  <section class="glass-card story-section reveal stagger">
+    <div class="section-label">📖 Story · 第一部分</div>
+
+    <figure class="illustration">
+      <img src="assets/kids-table.png" alt="Billy and friends talking about milk" loading="lazy">
+      <figcaption class="illustration-caption">Billy 告诉朋友们，牛奶来自奶牛 🥛</figcaption>
+    </figure>
+
+    <div class="story-text">
+      <p>
+        <span class="vocab-word" data-en="Billy" data-cn="比利（人名）">Billy<span class="tooltip">比利（人名）</span></span> is six years old.
+        He visits his <span class="vocab-word" data-en="uncle" data-cn="叔叔">uncle<span class="tooltip">叔叔</span></span> and
+        <span class="vocab-word" data-en="aunt" data-cn="阿姨 / 姑姑">aunt<span class="tooltip">阿姨 / 姑姑</span></span> every
+        <span class="vocab-word" data-en="summer" data-cn="夏天">summer<span class="tooltip">夏天</span></span>.
+        They live on a <span class="vocab-word" data-en="farm" data-cn="农场">farm<span class="tooltip">农场</span></span>.
+      </p>
+      <p>
+        They have <span class="vocab-word" data-en="cows" data-cn="奶牛">cows<span class="tooltip">奶牛</span></span>,
+        <span class="vocab-word" data-en="chickens" data-cn="鸡">chickens<span class="tooltip">鸡</span></span>,
+        <span class="vocab-word" data-en="sheep" data-cn="绵羊">sheep<span class="tooltip">绵羊</span></span>,
+        and a big horse on the farm.
+        Billy loves all the <span class="vocab-word" data-en="animals" data-cn="动物">animals<span class="tooltip">动物</span></span>.
+      </p>
+      <p>
+        This summer, he is going to learn how to <span class="vocab-word" data-en="milk" data-cn="挤奶（动词）">milk<span class="tooltip">挤奶</span></span> a cow.
+        Wow! His friends cannot believe it.
+      </p>
+    </div>
+
+    <!-- Chinese Translation (Collapsible) -->
+    <div class="translation-toggle" onclick="toggleTranslation(this)">
+      <span class="toggle-arrow">▶</span> 中文翻译
+    </div>
+    <div class="translation-content">
+      <p>比利六岁了。他每年夏天都会去看望叔叔和阿姨。他们住在农场里。</p>
+      <p>农场里有奶牛、鸡、绵羊和一匹大马。比利喜欢所有的动物。</p>
+      <p>今年夏天，他要学习怎样给奶牛挤奶。哇！他的朋友们简直不敢相信。</p>
+    </div>
+  </section>
+
+  <!-- Story Content Part 2 -->
+  <section class="glass-card story-section reveal stagger">
+    <div class="section-label">📖 Story · 第二部分</div>
+
+    <figure class="illustration">
+      <img src="assets/cow-grass.png" alt="A cow eating grass on the farm" loading="lazy">
+      <figcaption class="illustration-caption">奶牛吃草，把草变成牛奶 🌱</figcaption>
+    </figure>
+
+    <div class="story-text">
+      <p>
+        "We get our milk from the <span class="vocab-word" data-en="store" data-cn="商店">store<span class="tooltip">商店</span></span>,"
+        they say. "But our friend is going to get it from a cow."
+      </p>
+      <p>
+        Billy laughs. "Milk does not come from the store," he says. "Milk comes from a cow."
+      </p>
+      <p>
+        His friends do not believe him. But his teacher says,
+        "Yes, milk comes from cows. Cows eat grass. They change the grass into milk.
+        The <span class="vocab-word" data-en="farmer" data-cn="农民 / 农场主">farmer<span class="tooltip">农民 / 农场主</span></span>
+        sells the milk. And we buy it in the stores."
+      </p>
+      <p>
+        The teacher tells them one more thing. "Did you know that cows have four
+        <span class="vocab-word" data-en="stomachs" data-cn="胃（复数）">stomachs<span class="tooltip">胃（复数）</span></span>?"
+        The kids are surprised. But it's true!
+      </p>
+    </div>
+
+    <!-- Chinese Translation (Collapsible) -->
+    <div class="translation-toggle" onclick="toggleTranslation(this)">
+      <span class="toggle-arrow">▶</span> 中文翻译
+    </div>
+    <div class="translation-content">
+      <p>他们说："我们的牛奶是从商店买来的。但我们的朋友竟然要从奶牛身上取牛奶。"</p>
+      <p>比利笑了。"牛奶不是来自商店，"他说，"牛奶来自奶牛。"</p>
+      <p>他的朋友们不相信他。但是他的老师说："是的，牛奶来自奶牛。奶牛吃草，它们把草变成牛奶。农民卖掉牛奶，我们再去商店购买。"</p>
+      <p>老师还告诉他们一件事："你们知道奶牛有四个胃吗？"孩子们都很惊讶。但这是真的！</p>
+    </div>
+  </section>
+
+  <!-- Flowchart: Milk Process -->
+  <section class="glass-card reveal">
+    <div class="flowchart-section">
+      <div class="flowchart-title">🌿 牛奶的诞生之旅</div>
+      <div class="flowchain">
+        <div class="flow-item fc-grass">
+          <div class="flow-icon">🌾</div>
+          <div class="flow-label">草 Grass</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item fc-cow">
+          <div class="flow-icon">🐄</div>
+          <div class="flow-label">奶牛 Cow</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item fc-milk">
+          <div class="flow-icon">🥛</div>
+          <div class="flow-label">牛奶 Milk</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item fc-farmer">
+          <div class="flow-icon">👨‍🌾</div>
+          <div class="flow-label">农夫 Farmer</div>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-item fc-store">
+          <div class="flow-icon">🏪</div>
+          <div class="flow-label">商店 Store</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vocabulary Summary -->
+  <section class="glass-card vocab-card reveal">
+    <div class="section-label">📝 Key Vocabulary · 重点词汇</div>
+    <div class="vocab-grid" id="vocabGrid">
+      <div class="vocab-item" data-en="Billy" data-cn="比利（人名）"><div class="vocab-en">Billy</div><div class="vocab-cn">比利</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="uncle" data-cn="叔叔"><div class="vocab-en">uncle</div><div class="vocab-cn">叔叔</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="aunt" data-cn="阿姨 / 姑姑"><div class="vocab-en">aunt</div><div class="vocab-cn">阿姨</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="farm" data-cn="农场"><div class="vocab-en">farm</div><div class="vocab-cn">农场</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="cow" data-cn="奶牛"><div class="vocab-en">cow</div><div class="vocab-cn">奶牛</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="milk" data-cn="挤奶 / 牛奶"><div class="vocab-en">milk</div><div class="vocab-cn">牛奶 / 挤奶</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="store" data-cn="商店"><div class="vocab-en">store</div><div class="vocab-cn">商店</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="farmer" data-cn="农夫"><div class="vocab-en">farmer</div><div class="vocab-cn">农夫</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="stomach" data-cn="胃"><div class="vocab-en">stomach</div><div class="vocab-cn">胃</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="believe" data-cn="相信"><div class="vocab-en">believe</div><div class="vocab-cn">相信</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="surprised" data-cn="惊讶的"><div class="vocab-en">surprised</div><div class="vocab-cn">惊讶的</div><span class="sound-icon">🔊</span></div>
+      <div class="vocab-item" data-en="grass" data-cn="草"><div class="vocab-en">grass</div><div class="vocab-cn">草</div><span class="sound-icon">🔊</span></div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer reveal">
+    <p>✨ <span>One Story A Day</span> · 让阅读成为每天的习惯 ✨</p>
+  </footer>
+
+</div>
+
+<!-- Mobile Vocab Modal -->
+<div class="vocab-modal-overlay" id="vocabModal">
+  <div class="vocab-modal">
+    <div class="vocab-modal-en" id="modalEn"></div>
+    <div class="vocab-modal-cn" id="modalCn"></div>
+    <button class="modal-close" onclick="closeModal()">知道了 ✓</button>
+  </div>
+</div>
+
+<script>
+// ===== Audio Player Logic =====
+const audio = document.getElementById('audio');
+const btnPlay = document.getElementById('btnPlay');
+const iconPlay = document.getElementById('iconPlay');
+const iconPause = document.getElementById('iconPause');
+const progressBar = document.getElementById('progressBar');
+const currentTimeEl = document.getElementById('currentTime');
+const durationEl = document.getElementById('duration');
+
+function formatTime(sec) {
+  if (!isFinite(sec)) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60).toString().padStart(2, '0');
+  return m + ':' + s;
+}
+
+function updateUI() {
+  const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+  progressBar.style.setProperty('--progress', pct + '%');
+  progressBar.value = pct;
+  currentTimeEl.textContent = formatTime(audio.currentTime);
+}
+
+audio.addEventListener('loadedmetadata', () => {
+  durationEl.textContent = formatTime(audio.duration);
+});
+
+audio.addEventListener('timeupdate', updateUI);
+
+audio.addEventListener('ended', () => {
+  btnPlay.classList.remove('playing');
+  iconPlay.style.display = '';
+  iconPause.style.display = 'none';
+});
+
+btnPlay.addEventListener('click', togglePlay);
+
+function togglePlay() {
+  if (audio.paused) {
+    audio.play();
+    btnPlay.classList.add('playing');
+    iconPlay.style.display = 'none';
+    iconPause.style.display = '';
+  } else {
+    audio.pause();
+    btnPlay.classList.remove('playing');
+    iconPlay.style.display = '';
+    iconPause.style.display = 'none';
+  }
+}
+
+// Seek
+progressBar.addEventListener('input', () => {
+  if (audio.duration) {
+    audio.currentTime = (progressBar.value / 100) * audio.duration;
+  }
+});
+
+// Skip buttons
+document.getElementById('btnForward').addEventListener('click', () => {
+  audio.currentTime = Math.min(audio.currentTime + 10, audio.duration || 0);
+});
+document.getElementById('btnBackward').addEventListener('click', () => {
+  audio.currentTime = Math.max(audio.currentTime - 10, 0);
+});
+
+// Speed control
+const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+document.querySelectorAll('.speed-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    audio.playbackRate = parseFloat(btn.dataset.speed);
+  });
+});
+audio.playbackRate = 1;
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch(e.key) {
+    case ' ':
+      e.preventDefault();
+      togglePlay();
+      break;
+    case 'ArrowRight':
+      audio.currentTime = Math.min(audio.currentTime + 10, audio.duration || 0);
+      break;
+    case 'ArrowLeft':
+      audio.currentTime = Math.max(audio.currentTime - 10, 0);
+      break;
+  }
+});
+
+// ===== Vocab Interaction (Mobile tap → modal) =====
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+
+if (isTouchDevice) {
+  document.querySelectorAll('.vocab-word').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      showModal(el.dataset.en, el.dataset.cn);
+    });
+  });
+}
+
+// ===== Collapsible Translation =====
+window.toggleTranslation = function(toggle) {
+  toggle.classList.toggle('open');
+  const content = toggle.nextElementSibling;
+  content.classList.toggle('expanded');
+};
+
+// ===== TTS Pronunciation =====
+function speakWord(word, el) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(word);
+  utt.lang = 'en-US';
+  utt.rate = 0.9;
+  if (el) {
+    el.classList.add('playing-sound');
+    utt.onend = () => el.classList.remove('playing-sound');
+    utt.onerror = () => el.classList.remove('playing-sound');
+  }
+  speechSynthesis.speak(utt);
+}
+
+document.querySelectorAll('.vocab-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const word = item.dataset.en;
+    showModal(item.dataset.en, item.dataset.cn);
+    speakWord(word, item);
+  });
+});
+
+const modalOverlay = document.getElementById('vocabModal');
+const modalEn = document.getElementById('modalEn');
+const modalCn = document.getElementById('modalCn');
+
+function showModal(en, cn) {
+  modalEn.textContent = en;
+  modalCn.textContent = cn;
+  modalOverlay.classList.add('show');
+}
+window.closeModal = function() {
+  modalOverlay.classList.remove('show');
+};
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeModal();
+});
+
+// ===== Scroll Reveal Animation =====
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -40px 0px' };
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+</script>
+</body>
+</html>
